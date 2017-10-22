@@ -10,7 +10,7 @@ class Book Extends REST_Controller{
 
 	// menamppilkandata
 	function index_get(){
-		$data = $this->db->get('book')->result();
+		$data = $this->db->get('books')->result();
 		return $this->response($data,200);
 	}
 
@@ -27,7 +27,7 @@ class Book Extends REST_Controller{
 				'description' => $description
 			);
 
-		$insert = $this->db->insert('book', $book);
+		$insert = $this->db->insert('books', $book);
 
 		if($insert)
 			$this->response($book, 200);
@@ -37,4 +37,59 @@ class Book Extends REST_Controller{
 		}
 	}
 
+	function index_put(){
+		$isbn = $this->put('isbn');
+		$title = $this->put('title');
+		$writer = $this->put('writer');
+		$description = $this->put('description');
+		
+		$book = $this->db->get_where('books', array('isbn' => $isbn));
+
+		if($book->num_rows > 0){
+
+			$book = array(
+				'title' => $title,
+				'writer' => $writer,
+				'description' => $description
+			);
+
+			$this->db->where('isbn', $isbn);
+			$update = $this->db->update('books', $book);
+
+			if($update)
+				$this->response($book, 200);
+			else{
+				$data = array('status', 'Gagal insert');
+				$this->response($data, 502);
+			}
+		}else{
+			$data = array(
+				'status' => "Bbuku dengan ISBN: " .$isbn . " tidak ada"
+			);
+
+			$this->response($data, 200);
+		}
+	}
+
+	function index_delete($isbn){
+		$isbn = $this->delete('isbn');
+
+		$book = $this->db->get_where('books', array('isbn' => $isbn));
+
+		if($book->num_rows > 0){
+			$this->db->where('isbn', $isbn);
+			$this->db->delete('books');
+			$data = array(
+				'status' => "Berhasil menghaus data dengan ISBN: " .$isbn
+			);
+
+			$this->response($data, 200);
+		}else{
+			$data = array(
+				'status' => "Bbuku dengan ISBN: " .$isbn . " tidak ada"
+			);
+
+			$this->response($data, 200);
+		}
+	}
 }
